@@ -119,10 +119,12 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping):
         
         #used to contrl qaoa part
         qaoa_start_position = (1+qaoa_cycle//2) % 2 # be careful with the start position, we need +1 cuz the first swap loop will be skipped.
-        if qaoa_cycle > 2*unit_size: 
-            if_mix_qaoa = False
+        # if qaoa_cycle > 2*unit_size: 
+        #     if_mix_qaoa = False
+        
         only_one_cycle = True # used to control the one cycle of qaoa pattern. Performing a sequence of parallel swap/cphase gates in one cycle.
 
+        # a sequence of parallel swap gates in 2xN QFT, so we need only_one_cycle to control the qaoa pattern only inserted once.
         for j in range(i):
             if j < n and (2*i-j) < n:
                 print(f'SWAP( q[{j}], q[{2*i-j}] )')
@@ -131,6 +133,8 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping):
                 qubit_mapping.SWAP_gate_implementation(physical_q1, physical_q2)
                 #insert QAOA SWAP here:
                 if if_mix_qaoa and only_one_cycle:
+                    if qaoa_cycle > 2*unit_size:
+                        continue
                     # print(f'start_position is {qaoa_start_position}')
                     qaoa_gates_sequence(qaoa_start_position, 'SWAP', qubit_mapping, physical_unit_number=2)
                     only_one_cycle = False
@@ -146,7 +150,7 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping):
             if j < n and (2*i+1-j) < n:
                 print(f'loop3: CX( q[{j}], q[{2*i+1-j}] )')
                 # insert interactions between 2xN pattern and QAOA pattern
-                if only_one_cycle:
+                if if_mix_qaoa and only_one_cycle:
                     for physical_q in range(unit_size, 2*unit_size):
                         pair1 = (qubit_mapping.mapping_PtoL[physical_q], qubit_mapping.mapping_PtoL[physical_q+ unit_size])
                         pair2 = (qubit_mapping.mapping_PtoL[physical_q+unit_size], qubit_mapping.mapping_PtoL[physical_q])
@@ -168,7 +172,7 @@ def main():
     
     #setup initial mapping
     unit_count = 8
-    unit_size = 5
+    unit_size = 8
 
     if len(sys.argv) > 1:
         unit_count = int(sys.argv[1])
