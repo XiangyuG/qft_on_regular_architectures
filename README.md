@@ -17,6 +17,9 @@ Fault Tolerant: Lattice sugery
 python3 lattice_sugery_qft_mix.py <# rows> <# column>
 ```
 
-
-
+## Generate figures of different architectures:
+```
+cd fig_gen/fig_draw
+sh run_fig_draw.sh <architecture name(Sycamore/Heavy-hex/Lattice_Surgery)>
+```
 
