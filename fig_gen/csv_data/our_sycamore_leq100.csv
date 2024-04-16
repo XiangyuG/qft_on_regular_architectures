@@ -1,0 +1,5 @@
+arch,scale,depth,swap,num_qubits
+sycamore,4,81,96,16
+sycamore,6,213,498,36
+sycamore,8,397,1504,64
+sycamore,10,639,3510,100

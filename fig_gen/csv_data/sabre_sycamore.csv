@@ -1,0 +1,11 @@
+arch,scale,depth,swap,cp
+sycamore,2,11,3,6
+sycamore,4,102,62,120
+sycamore,6,363,484,630
+sycamore,8,748,1580,2016
+sycamore,10,1390,4136,4950
+sycamore,12,2369,9770,10296
+sycamore,14,4017,18731,19110
+sycamore,16,7331,34414,32640
+sycamore,18,10005,57519,52326
+sycamore,20,16591,88617,79800

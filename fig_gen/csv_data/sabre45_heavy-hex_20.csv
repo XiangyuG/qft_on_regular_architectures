@@ -1,0 +1,5 @@
+arch,num_qubits,scale,compilation_time,depth,swap
+heavy-hex,5,1,0.0253140926361084,14,6
+heavy-hex,10,2,0.015100717544555664,44,36
+heavy-hex,15,3,0.01944708824157715,87,102
+heavy-hex,20,4,0.03848385810852051,118,192
