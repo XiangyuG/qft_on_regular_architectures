@@ -14,7 +14,7 @@ python3 heavy_hex_qft.py <# qubits in the main row>
 
 Fault Tolerant: Lattice sugery
 ```
-python3 lattice_sugery_qft_mix.py
+python3 lattice_sugery_qft_mix.py <# rows> <# column>
 ```
 
 
