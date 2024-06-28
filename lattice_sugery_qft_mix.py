@@ -53,7 +53,13 @@ class mapping:
         self.mapping_PtoL[physical_q1] = logical_q2
         self.mapping_PtoL[physical_q2] = logical_q1
 
-        
+    def logical_unit_swap(self, unit1, unit2):
+        # this function swaps two logical units in the qubit_mapping
+        # offset is added in this function
+        N = self.unit_size
+        for i in range(N):
+            self.SWAP_gate_implementation(self.mapping_LtoP[unit1*N+i], self.mapping_LtoP[unit2*N+i])
+
 def LNN_qft(n):
     for m in range(0, 4*n-6, 2):
         k = (m//2)+1
@@ -138,12 +144,32 @@ def qaoa_gates_sequence(start_position, gate_type, qubit_mapping, logical_unit_n
             qubit_mapping.SWAP_gate_implementation(qubit_mapping.mapping_LtoP[i], qubit_mapping.mapping_LtoP[i+1])
 
 
-def logical_unit_swap(qubit_mapping, unit1, unit2):
-    # this function swaps two logical units in the qubit_mapping
-    N = qubit_mapping.unit_size
-    for i in range(N):
-        qubit_mapping.SWAP_gate_implementation(qubit_mapping.mapping_LtoP[unit1*N+i], qubit_mapping.mapping_LtoP[unit2*N+i])
-
+def qaoa_2D(qubit_mapping, unit_pair_list):
+    longer_list = unit_pair_list[0]
+    shorter_list = unit_pair_list[1]
+    if len(unit_pair_list[0]) < len(unit_pair_list[1]):
+        longer_list = unit_pair_list[1]
+        shorter_list = unit_pair_list[0]
+        print('swap is not needed in shorter list')
+    elif len(unit_pair_list[0]) == len(unit_pair_list[1]):
+        print('swap is not need in unit list1 but need swap in unit_k if unit_k is not in unit list2')
+        # for example, ul1= [(1, 5), (2, 4)] ul2= [(2, 5), (3, 4)]. we do not need swap for ul2 except unit 3
+        units = []
+        for u_pair in unit_pair_list[0]:
+            if u_pair[0] or u_pair[1] in units:
+                raise("error")
+            units.append[u_pair[0], u_pair[1]]
+        unit_need_swap = -1
+        for u_pair in unit_pair_list[1]:
+            if u_pair[0] not in units:
+                unit_need_swap = u_pair[0]
+                break
+            if u_pair[1] not in units:
+                unit_need_swap = u_pair[1]
+                break
+        if unit_need_swap == -1:
+            raise('error')
+        print('insert swap at unit_pair_list[0] and unit_need_swap from unit_pair_list[1]')
 
 def qaoa_LNN(N, qubit_mapping, physical_unit_number = 0):
     #this is a qaoa pattern in LNN architecture
@@ -232,7 +258,55 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset):
         qaoa_cycle += 2
 
     return bipartite_all_to_all
-        
+
+
+def qft_lattice(n, mapping):
+    circuit = []
+    # getting united based qft pattern. units are logical units
+    unit_pattern = LNN_qft_unit_base(n)
+    keys = list(unit_pattern.keys())
+    # print(keys)
+    # sort those operations, so we can iterate them in order and do the corresponding operations.
+    unit_operations = {}
+    for i in range(len(unit_pattern.items())):   
+        if ((i+1) >= len(unit_pattern)) and 'SWAP' in keys[i]:
+            # Skip the last SWAP operation
+            break
+        if i == 0:
+            unit_operations['qft0'] = unit_pattern[keys[i]]
+            continue
+        elif 'CX' in keys[i] and 'CX' in keys[i+1]:
+            unit_operations[f'qft{i}'] = [unit_pattern[keys[i]], unit_pattern[keys[i+1]]]
+            i = i + 1
+        elif 'SWAP' in keys[i] and 'SWAP' in keys[i+1]:
+            unit_operations[f'swap{i}'] = [unit_pattern[keys[i]], unit_pattern[keys[i+1]]]
+            i = i + 1
+    print(unit_operations)
+
+    # in this loop, we can do the corresponding operations in the order of the sorted keys.
+    qft_step = 0
+    for index, (key,item) in enumerate(unit_operations.items()):
+        if 'qft' in key:
+            if qft_step%2 == 0:
+                print(f'we do mix-qft here',key)
+                #TODO: add qft pattern here
+                if index == 0:
+                    print('check here later!!!!!!!!!!!!!!')
+                    twOxN_qft(False, mapping, 0, 0)
+                else:
+                    twOxN_qft(True, mapping, 0, 0)
+            if qft_step%2 == 1:
+                print(f'we do qaoa here', key)
+                #TODO: add qaoa pattern here
+            qft_step += 1
+        elif 'swap' in key:
+            print(f'we do swap here', key)
+            for swap_steps in item:
+                for swap_unit in swap_steps:
+                    print(f'SWAP unit: {swap_unit[0]}, {swap_unit[1]}')
+                    mapping.logical_unit_swap(swap_unit[0], swap_unit[1])
+    return circuit
+
 def main():
     # N = 4 # N is the unit size
     # coupling_graph = nx.grid_2d_graph(N, N)
@@ -254,8 +328,9 @@ def main():
     qubit_mapping.setup_initial_mapping()
     # qubit_mapping.print_mapping()
     if_mix_qaoa = True
-    result = twOxN_qft(if_mix_qaoa, qubit_mapping, 0, 2)
-    print(f'number of interactions is {len(result)}')
+    # result = twOxN_qft(if_mix_qaoa, qubit_mapping, 0, 2)
+    # print(f'number of interactions is {len(result)}')
+    qft_lattice(unit_size)
     # LNN_qft(6)
     # qaoa_LNN(qubit_mapping.unit_size, qubit_mapping, unit_number=2)
 
