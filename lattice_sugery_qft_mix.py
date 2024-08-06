@@ -23,7 +23,7 @@ class mapping:
         # this function sets up the initial mapping for NxN lattice
         # N is the number of qubit in one unit.
         N = self.unit_size
-        print(self.unit_count)
+        # print(self.unit_count)
         # unit_count_half = self.unit_count//2
         physical_index = 0
 
@@ -33,14 +33,14 @@ class mapping:
             for j in range(start, start+2*N, 2):
                 self.mapping_PtoL[physical_index] = j
                 self.mapping_LtoP[j] = physical_index
-                # print(f'physical_index is {physical_index}, j is {j}')
+                # # print(f'physical_index is {physical_index}, j is {j}')
                 physical_index += 1
             
             #second row
             for j in range(start+1, start+ 2*N, 2):
                 self.mapping_PtoL[physical_index] = j
                 self.mapping_LtoP[j] = physical_index
-                # print(f'physical_index is {physical_index}, j is {j}')
+                # # print(f'physical_index is {physical_index}, j is {j}')
                 physical_index += 1
         # initlize the unit mapping
         for i in range(0, self.unit_count):
@@ -99,7 +99,7 @@ def LNN_qft_unit_base(n):
     # every two layers of sway are performed together
     # n is the number of unit
 
-    print('--------------- Getting unit base LNN QFT......')
+    # print('--------------- Getting unit base LNN QFT......')
     #preparing the original qft
     unit_operation_sequnece = {}
     step = 0
@@ -109,7 +109,7 @@ def LNN_qft_unit_base(n):
         operations = []
         while i < k - i:
             if i < n and k-i < n:
-                # print(f'CX( q[{i}], q[{k-i}] )')
+                # # print(f'CX( q[{i}], q[{k-i}] )')
                 operations.append((i, k-i))
             i += 1
         unit_operation_sequnece[f'CX{step}'] = operations
@@ -119,17 +119,17 @@ def LNN_qft_unit_base(n):
         operations = []
         while i < k - i:
             if i < n and k-i < n:
-                # print(f'SWAP( q[{i}], q[{k-i}] )')
+                # # print(f'SWAP( q[{i}], q[{k-i}] )')
                 operations.append((i, k-i))
             i += 1
         unit_operation_sequnece[f'SWAP{step}'] = operations
         step += 1
-    # print(unit_operation_sequnece)
+    # # print(unit_operation_sequnece)
 
     # Convert original qft to make every two layers of SWAP are performed together
     # Convert the dictionary to a list of tuples for easier manipulation
     steps_list = list(unit_operation_sequnece.items())
-    # print(steps_list)
+    # # print(steps_list)
     # Iterate through the steps and swap the order of every second SWAP with its preceding CX
     for i in range(len(steps_list)):
         if 'SWAP' in steps_list[i][0] and int(steps_list[i][0].replace('SWAP', '')) % 4 == 3:
@@ -140,8 +140,8 @@ def LNN_qft_unit_base(n):
 
     # Convert the list of tuples back to a dictionary
     output = dict(steps_list)
-    print('(All numbers are logical unit index)')
-    print(output)
+    # print('(All numbers are logical unit index)')
+    # print(output)
     return output
 
 def qaoa_gates_sequence(start_position, gate_type, qubit_mapping, logical_unit_number):
@@ -157,12 +157,12 @@ def qaoa_gates_sequence(start_position, gate_type, qubit_mapping, logical_unit_n
             continue
         if gate_type == 'cphase':
             print(f'')
-            print(f'cphase( q[{i}], q[{i+1}] ) = cphase( q[{qubit_mapping.mapping_LtoP[i]}], q[{qubit_mapping.mapping_LtoP[i+1]}] )')
+            # print(f'cphase( q[{i}], q[{i+1}] ) = cphase( q[{qubit_mapping.mapping_LtoP[i]}], q[{qubit_mapping.mapping_LtoP[i+1]}] )')
         elif gate_type == 'SWAP':
-            # print(f'QAOA-SWAP( Q[{qubit_mapping.mapping_LtoP[i]}], Q[{qubit_mapping.mapping_LtoP[i+1]}] )')
+            # # print(f'QAOA-SWAP( Q[{qubit_mapping.mapping_LtoP[i]}], Q[{qubit_mapping.mapping_LtoP[i+1]}] )')
             qubit_mapping.SWAP_gate_implementation(i, i+1)
             s.append(f'SWAP( Q[{i}], Q[{i+1}] )')
-    print(f'qaoa-intra-unit-logical-{logical_unit_number}-{gate_type}: {s}')
+    # print(f'qaoa-intra-unit-logical-{logical_unit_number}-{gate_type}: {s}')
 
 
 def qaoa_2D(qubit_mapping, unit_pair_list):
@@ -194,7 +194,7 @@ def qaoa_2D(qubit_mapping, unit_pair_list):
             unit_neighbor[v].append(u)
 
 
-    # print('swap is not needed in shorter list')
+    # # print('swap is not needed in shorter list')
     # n steps in inter-unit cphase in longer list and n - 1 steps in intra-unit swap in longer list
     unit_size = qubit_mapping.unit_size
     
@@ -208,27 +208,27 @@ def qaoa_2D(qubit_mapping, unit_pair_list):
             physical_u2 = qubit_mapping.unit_LtoP[unit_pair[1]]
             for i in range(unit_size):
                 # be careful with the mapping here, logical qubits are placed 0 2 4 6 in a unit. 
-                # print(f'cphase( q[{qubit_mapping.mapping_PtoL[physical_u1*unit_size+i]}], q[{qubit_mapping.mapping_PtoL[physical_u2*unit_size+i]}] )')
+                # # print(f'cphase( q[{qubit_mapping.mapping_PtoL[physical_u1*unit_size+i]}], q[{qubit_mapping.mapping_PtoL[physical_u2*unit_size+i]}] )')
                 qubit_mapping.circuit.append(f'cphase( q[{qubit_mapping.mapping_PtoL[physical_u1*unit_size+i]}], q[{qubit_mapping.mapping_PtoL[physical_u2*unit_size+i]}] )')   
                 qubit_mapping.cphase_count += 1
                 c1.append(f'cphase( q[{qubit_mapping.mapping_PtoL[physical_u1*unit_size+i]}], q[{qubit_mapping.mapping_PtoL[physical_u2*unit_size+i]}] )')
-        print("-----------------")
-        print(f'inter-cphase-unit at U: {unit_pair_list[0]}')
-        print(f'c1 is {c1}')
-        print("-----------------")
+        # print("-----------------")
+        # print(f'inter-cphase-unit at U: {unit_pair_list[0]}')
+        # print(f'c1 is {c1}')
+        # print("-----------------")
 
         for unit_pair in unit_pair_list[1]:
             physical_u1 = qubit_mapping.unit_LtoP[unit_pair[0]]
             physical_u2 = qubit_mapping.unit_LtoP[unit_pair[1]]
             for i in range(unit_size):
-                # print(f'cphase( q[{qubit_mapping.mapping_PtoL[physical_u1*unit_size+i]}], q[{qubit_mapping.mapping_PtoL[physical_u2*unit_size+i]}] )')
+                # # print(f'cphase( q[{qubit_mapping.mapping_PtoL[physical_u1*unit_size+i]}], q[{qubit_mapping.mapping_PtoL[physical_u2*unit_size+i]}] )')
                 qubit_mapping.circuit.append(f'cphase( q[{qubit_mapping.mapping_PtoL[physical_u1*unit_size+i]}], q[{qubit_mapping.mapping_PtoL[physical_u2*unit_size+i]}] )')
                 qubit_mapping.cphase_count += 1
                 c2.append(f'cphase( q[{qubit_mapping.mapping_PtoL[physical_u1*unit_size+i]}], q[{qubit_mapping.mapping_PtoL[physical_u2*unit_size+i]}] )')
-        print(f'inter-cphase-unit at U: {unit_pair_list[1]}')
-        print(f'c2 is {c2}')
+        # print(f'inter-cphase-unit at U: {unit_pair_list[1]}')
+        # print(f'c2 is {c2}')
 
-        print("-----------------")
+        # print("-----------------")
         # implement intra-unit swap
         '''It is better to use queue to implement the swap here using info in unit_neighbor'''
         # Implement BFS to Visit Each Node Once
@@ -237,31 +237,31 @@ def qaoa_2D(qubit_mapping, unit_pair_list):
         units_start = {}
         start = cycle%2
         bfs(bfs_start_node, visited, unit_neighbor, units_start, start)
-        print(f'swap unit list{unit_pair_list}')
-        print(f'units_start is {units_start}')
-        print(f'bfs_start_node is {bfs_start_node}')
+        # print(f'swap unit list{unit_pair_list}')
+        # print(f'units_start is {units_start}')
+        # print(f'bfs_start_node is {bfs_start_node}')
         for key in unit_neighbor:
             physical_u = qubit_mapping.unit_LtoP[key]
-            print(f'intra-swap-unit at U: physical_u={physical_u}, logical_u={key}')
+            # print(f'intra-swap-unit at U: physical_u={physical_u}, logical_u={key}')
             qaoa_gates_sequence(units_start[key], 'SWAP', qubit_mapping, key)
 
     
 def qaoa_LNN(N, qubit_mapping, physical_unit_number = 0):
     #this is a qaoa pattern in LNN architecture
     #TODO: mapping is not updated in this version
-    print(f'unit_size is {N}')
-    print(f'unit_size is {physical_unit_number}')
+    # print(f'unit_size is {N}')
+    # print(f'unit_size is {physical_unit_number}')
 
     for cycle in range(0, 2*N-2+1, 4):
-        print(f'cycle {cycle}')
+        # print(f'cycle {cycle}')
         qaoa_gates_sequence(0, 'cphase', qubit_mapping, physical_unit_number)
-        print("-----------------")
+        # print("-----------------")
         qaoa_gates_sequence(1, 'SWAP', qubit_mapping, physical_unit_number)
-        print("-----------------")
+        # print("-----------------")
         qaoa_gates_sequence(1, 'cphase', qubit_mapping, physical_unit_number)
-        print("-----------------")
+        # print("-----------------")
         qaoa_gates_sequence(0, 'SWAP', qubit_mapping, physical_unit_number)
-        print("-----------------")
+        # print("-----------------")
 
 def find_path(pairs, head):
     def bfs(bfs_start_node, visited, graph):
@@ -281,7 +281,7 @@ def find_path(pairs, head):
         return path
     # Create the Adjacency List for BFS
     graph = {}
-    # print(pairs)
+    # # print(pairs)
     for l in pairs:
         for u, v in l:
             if u not in graph:
@@ -326,11 +326,11 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset, uni
     l1_start_0 = []#logical units in the list
     l2_start_1 = []#logical units in the list
     if if_mix_qaoa:
-        print('Implementing 2xN qft mix with a unit below it, a bipartite all-to-all qaoa pattern')
+        # print('Implementing 2xN qft mix with a unit below it, a bipartite all-to-all qaoa pattern')
         # sort the unit_interaction_list to make the 'qft_unit_offset' unit is the first unit in the list
         # for example, unit_order = [2,3,1,4,0,5] in the paper, QFT paper Fig. 15
         unit_order = find_path(unit_interaction_list, qft_unit_offset)
-        print(f'unit_position is {unit_order}')
+        # print(f'unit_position is {unit_order}')
         # given the list, generate two lists of consecutive pairs to help generate inter-unit cphase
         # l1_start_0 = [(0,1), (2,3), (4,5)] l2_start_1 = [(1,2), (3,4), (5,0)]
         l1_start_0, l2_start_1 = generate_unit_pairs_cphase(unit_order)
@@ -347,13 +347,13 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset, uni
         only_one_cycle = True # used to control the one cycle of qaoa pattern. Performing a sequence of parallel swap/cphase gates in one cycle.
         '''The following code contains three for loops correpsonding to the three steps in the paper,TOQM Fig. 14'''
         # a sequence of parallel swap gates in 2xN QFT, so we need only_one_cycle to control the qaoa pattern onl inserted once.
-        print(f'3cycles SWAP-{i} in 2xN QFT,(step2)')
+        # print(f'3cycles SWAP-{i} in 2xN QFT,(step2)')
         s = []
         for j in range(i):
             if j < n and (2*i-j) < n:
                 physical_q1 = qubit_mapping.mapping_LtoP[j+offset_qft]
                 physical_q2 = qubit_mapping.mapping_LtoP[2*i-j+offset_qft]
-                # print(f'QFT-SWAP( q[{j+offset_qft}], q[{2*i-j+offset_qft}] ) = SWAP( Q[{physical_q1}], Q[{physical_q2}] )')
+                # # print(f'QFT-SWAP( q[{j+offset_qft}], q[{2*i-j+offset_qft}] ) = SWAP( Q[{physical_q1}], Q[{physical_q2}] )')
                 qubit_mapping.SWAP_gate_implementation(physical_q1, physical_q2)
                 qubit_mapping.circuit.append(f'SWAP( Q[{physical_q1}], Q[{physical_q2}] )')
                 s.append(f'SWAP( Q[{physical_q1}], Q[{physical_q2}] )')
@@ -364,9 +364,9 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset, uni
                         # but we need to finish all mixed qft and qaoa part.
                         only_one_cycle = False
                         continue
-                    # print(f'start_position is {qaoa_start_position}')
+                    # # print(f'start_position is {qaoa_start_position}')
                     # add more intra-unit swap for other unit here.
-                    # print('this is a mixed qaoa swap')
+                    # # print('this is a mixed qaoa swap')
                     qaoa_gates_sequence(qaoa_start_position, 'SWAP', qubit_mapping, qubit_mapping.unit_PtoL[qaoa_unit_offset])
                     if len(unit_order) < 3:
                         raise ValueError('unit_order is not correct!  units number is worng!')
@@ -374,25 +374,25 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset, uni
                         qaoa_start_position = 1-qaoa_start_position
                         qaoa_gates_sequence(qaoa_start_position, 'SWAP', qubit_mapping,qubit_mapping.unit_PtoL[u])
                     only_one_cycle = False
-        print(f'qft-swaps: {s}')
+        # print(f'qft-swaps: {s}')
         qubit_mapping.circuit = qubit_mapping.circuit + s
 
         
-        print("-----------------")
+        # print("-----------------")
         # this loop is for the third step in the paper, TOQM Fig. 14
         c = []
-        print(f'3cycles CX-{i} in 2xN QFT, loop2(step3)')
+        # print(f'3cycles CX-{i} in 2xN QFT, loop2(step3)')
         for j in range(i):
             if j < n and (2*i-j) < n:
-                # print(f'loop2: CX( q[{j+offset_qft}], q[{2*i-j+offset_qft}] )')
+                # # print(f'loop2: CX( q[{j+offset_qft}], q[{2*i-j+offset_qft}] )')
                 qubit_mapping.circuit.append(f'CX( q[{j+offset_qft}], q[{2*i-j+offset_qft}] )')
                 qubit_mapping.cphase_count += 1
                 c.append(f'CX( q[{j+offset_qft}], q[{2*i-j+offset_qft}] )')
-        print(f'qft-cx: {c}')
+        # print(f'qft-cx: {c}')
         
         
-        print("-----------------")
-        print(f'3cycles CX-{i} in 2xN QFT, loop3(step1)')
+        # print("-----------------")
+        # print(f'3cycles CX-{i} in 2xN QFT, loop3(step1)')
         only_one_cycle = True
         # this loop is for the first step in the paper, TOQM Fig. 14
         qft_cx = []
@@ -406,7 +406,7 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset, uni
                 # insert interactions between 2xN pattern and QAOA pattern
                 # add more inter-unit cphase for other unit here.
                 if if_mix_qaoa and only_one_cycle: # the loop is within a for loop of qft gates, so we only need to insert qaoa gates once.
-                    print(f'l2_start_1: {l2_start_1}')
+                    # print(f'l2_start_1: {l2_start_1}')
                     # insert the inter-unit cphase for pairs of odd-even unit: (1,2) (3,4)...
                     qaoa_cx_at_unit = []
                         # this is the mixed qft and qaoa part. 
@@ -417,7 +417,7 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset, uni
                         pair2 = (qubit_mapping.mapping_PtoL[physical_q+unit_size], qubit_mapping.mapping_PtoL[physical_q])
                         if (pair1 not in bipartite_all_to_all) and (pair2 not in bipartite_all_to_all):
                             bipartite_all_to_all.append(pair1)
-                            # print(pair1)
+                            # # print(pair1)
                             # qaoa_cx.append(f'qaoa: CX( q[{pair1[0]}], q[{pair1[1]}] )')
                             qaoa_cx_at_unit.append(f'cphase( q[{pair1[0]}], q[{pair1[1]}] )')
                     qaoa_cx_1[(qft_unit_offset+1, qubit_mapping.unit_PtoL[qaoa_unit_offset])] = qaoa_cx_at_unit
@@ -438,7 +438,7 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset, uni
                         qaoa_cx_1[pair] = qaoa_cx_at_unit
 
                     # insert the inter-unit cphase for pairs of even-odd unit: (0,1) (2,3)...
-                    print(f'l1_start_0: {l1_start_0}')
+                    # print(f'l1_start_0: {l1_start_0}')
                     for pair in l1_start_0[1:]:
                         qaoa_cx_at_unit = []
                         physical_u1 = qubit_mapping.unit_LtoP[pair[0]]
@@ -448,21 +448,21 @@ def twOxN_qft(if_mix_qaoa, qubit_mapping, qft_unit_offset, qaoa_unit_offset, uni
                         qaoa_cx_0[pair] = qaoa_cx_at_unit
 
                     only_one_cycle = False
-        print(f'qft_cx: {qft_cx}')
+        # print(f'qft_cx: {qft_cx}')
         qubit_mapping.circuit = qubit_mapping.circuit + qft_cx
         qubit_mapping.cphase_count += len(qft_cx)
         if if_mix_qaoa:
-            print("-------")
-            print(f'qaoa_cx_0: {qaoa_cx_0}')
+            # print("-------")
+            # print(f'qaoa_cx_0: {qaoa_cx_0}')
             for key in qaoa_cx_0:
                 qubit_mapping.circuit = qubit_mapping.circuit + qaoa_cx_0[key]
                 qubit_mapping.cphase_count += len(qaoa_cx_0[key])
-            print("-------")
-            print(f'qaoa_cx_1: {qaoa_cx_1}')
+            # print("-------")
+            # print(f'qaoa_cx_1: {qaoa_cx_1}')
             for key in qaoa_cx_1:
                 qubit_mapping.circuit = qubit_mapping.circuit + qaoa_cx_1[key]
                 qubit_mapping.cphase_count += len(qaoa_cx_1[key])
-        print("-----------------")
+        # print("-----------------")
         qaoa_cycle += 2
 
     return bipartite_all_to_all
@@ -476,11 +476,11 @@ def qft_lattice(n, mapping):
     # getting united based qft pattern. units are logical units
     unit_pattern = LNN_qft_unit_base(n)
     keys = list(unit_pattern.keys())
-    # print(keys)
+    # # print(keys)
 
     # sort those operations, so we can iterate them in order and do the corresponding operations.
-    print(' ')
-    print('Putting two steps together:')
+    # print(' ')
+    # print('Putting two steps together:')
     unit_operations = {} # unit_opration = {qft0: [[(2,1)][(0,1)(2,3)]]}
     for i in range(len(unit_pattern.items())):   
         if ((i+1) >= len(unit_pattern)) and 'SWAP' in keys[i]:
@@ -495,40 +495,40 @@ def qft_lattice(n, mapping):
         elif 'SWAP' in keys[i] and 'SWAP' in keys[i+1]:
             unit_operations[f'swap(step:{i},step:{i+1})'] = [unit_pattern[keys[i]], unit_pattern[keys[i+1]]]
             i = i + 1
-    print(unit_operations)
+    # print(unit_operations)
     # sys.exit()
 
     # in this loop, we can do the corresponding operations in the order of the sorted keys.
-    print('-------------Start generating the quantum circuit----------------')
+    # print('-------------Start generating the quantum circuit----------------')
     mix_step = 0
     for index, (key,item) in enumerate(unit_operations.items()):
-        print('')
-        print('---------------------------------------')
-        print(f' (Unit cycle: {index}, doing {key} ): ')
+        # print('')
+        # print('---------------------------------------')
+        # print(f' (Unit cycle: {index}, doing {key} ): ')
         if 'qft' in key:
             mix_tuple = (mix_step, mix_step+1)
             if (mix_tuple in item) or (len(item) == 2 and (mix_tuple in item[0] or mix_tuple in item[1])):
-                print(f'we do mix-qft here',key, item)
+                # print(f'we do mix-qft here',key, item)
                 if len(item) == 1:
                     # this is the first step AE(u0, u1)
                     # if number of unit is even, this if statement should be right. not sure about the odd number of units.
-                    print('non mixed-qft: this is the first step AE(u0, u1)')
+                    # print('non mixed-qft: this is the first step AE(u0, u1)')
                     twOxN_qft(False, mapping, mix_step, 0, item)
                 else:
-                    print('mixed-qft: twOxN_qft(True)-check here later!!!!!!!!!!!!!!')
+                    # print('mixed-qft: twOxN_qft(True)-check here later!!!!!!!!!!!!!!')
                     twOxN_qft(True, mapping, mix_step, 2, item) # 2 is the third physical unit 
                 mix_step += 2
                 
             else:
-                print(f'we do pure qaoa here', key,item)
+                # print(f'we do pure qaoa here', key,item)
                 qaoa_2D(mapping, item)
           
         elif 'swap' in key:
-            print(f'we do logical unit swap here', key, item)
+            # print(f'we do logical unit swap here', key, item)
             for swap_step in item:
                 # we only have two steps
                 for swap_unit in swap_step:
-                    # print(f'SWAP unit: {swap_unit[0]}, {swap_unit[1]}')
+                    # # print(f'SWAP unit: {swap_unit[0]}, {swap_unit[1]}')
                     mapping.logical_unit_swap(swap_unit[0], swap_unit[1])
     return circuit
 
@@ -536,7 +536,7 @@ def main(row, if_output_circuit):
     # N = 4 # N is the unit size
     # coupling_graph = nx.grid_2d_graph(N, N)
     # coupling_graph = nx.convert_node_labels_to_integers(coupling_graph)
-    # print(coupling_graph.edges)
+    # # print(coupling_graph.edges)
     
     #setup initial mapping
     unit_count = unit_size = row
@@ -544,22 +544,22 @@ def main(row, if_output_circuit):
     # if len(sys.argv) > 1:
     #     unit_count = int(sys.argv[1])
     #     unit_size = int(sys.argv[2])
-    # print(f'unit_count is {unit_count}, unit_size is {unit_size}')
+    # # print(f'unit_count is {unit_count}, unit_size is {unit_size}')
 
     mapping_LtoP = {}
     mapping_PtoL = {}
     qubit_mapping = mapping(unit_size, unit_count, mapping_LtoP, mapping_PtoL)
     qubit_mapping.setup_initial_mapping()
-    # qubit_mapping.print_mapping()
+    # qubit_mapping.# print_mapping()
     if_mix_qaoa = True
     # result = twOxN_qft(if_mix_qaoa, qubit_mapping, 0, 2)
-    # print(f'number of interactions is {len(result)}')
+    # # print(f'number of interactions is {len(result)}')
     qft_lattice(unit_size, qubit_mapping)
-    print(f'Original circuit gates are: {(unit_size*unit_size-1+1)*(unit_size*unit_size-1)/2}')
-    print(f'Compiled circuit gates are: {qubit_mapping.cphase_count}')
+    # print(f'Original circuit gates are: {(unit_size*unit_size-1+1)*(unit_size*unit_size-1)/2}')
+    # print(f'Compiled circuit gates are: {qubit_mapping.cphase_count}')
     if if_output_circuit:
-        print(' ')
-        print('!!!!--------OUTPUTING CIRCUIT---------!!!!')
+        # print(' ')
+        # print('!!!!--------OUTPUTING CIRCUIT---------!!!!')
         
         print(qubit_mapping.circuit)
     # LNN_qft(6)
@@ -568,7 +568,7 @@ def main(row, if_output_circuit):
     
 if __name__ == "__main__":
     row = 4
-    if_output_circuit = 0
+    if_output_circuit = 1
     if len(sys.argv) == 2:
         # Access command line arguments
         row = int(sys.argv[1])
