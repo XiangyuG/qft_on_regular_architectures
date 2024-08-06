@@ -11,7 +11,7 @@ def qft_Func(arch, num_qubits, N):
 
     # Decompose the QFT circuit
     decomposed_qft = qc_qft.decompose()
-    decomposed_qft.draw(output = 'text', filename = 'decomposed.pdf', fold = 400)
+    # decomposed_qft.draw(output = 'text', filename = 'decomposed.pdf', fold = 400)
 
     # N*N (2-20)
     ## Depth  gate count(swap,cp)    
@@ -109,7 +109,7 @@ def qft_Func(arch, num_qubits, N):
     sabre_circuit = transpile(decomposed_qft, backend=AerSimulator(),
                             coupling_map=coupling_map,
                             seed_transpiler=1,    # Sets random seed for the stochastic parts of the transpiler
-                            optimization_level=1, # How much optimization to perform on the circuits.
+                            optimization_level=0, # How much optimization to perform on the circuits.
                             layout_method='sabre',
                             routing_method='sabre',
                             basis_gates=['swap', 'cx', 'cp', 'u'])
@@ -117,8 +117,8 @@ def qft_Func(arch, num_qubits, N):
 
     compilation_time = end_time - start_time
     print(f'\nCompilation time is {compilation_time} s')
-    sabre_circuit.draw(output='mpl', filename='compiled_output.pdf', fold=4000)
-    sabre_circuit.qasm(filename="compiled_qasm.qasm")
+    # sabre_circuit.draw(output='mpl', filename='compiled_output.pdf', fold=4000)
+    # sabre_circuit.qasm(filename="compiled_qasm.qasm")
     print(f'\nDepth: {sabre_circuit.depth()}\ngate count: {sabre_circuit.count_ops()}\n')
 
     # res = {'arch': arch, 'num_qubits': num_qubits, 'scale': N, 'compilation_time': compilation_time, 'depth': sabre_circuit.depth(), 'swap': sabre_circuit.count_ops()['swap'], 'cp': sabre_circuit.count_ops()['cp']}

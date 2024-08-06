@@ -250,13 +250,13 @@ def iterTest():
         print("total cycles: {}".format(stats['gateDepth']))
 
 def main(argv):
-    if len(argv) != 2:
-        print("Usage python3", argv[0], "<# qubits in the main row>")
-        sys.exit(1)
-    total_qubits = int(argv[1])
-
+    # if len(argv) != 2:
+    #     print("Usage python3", argv[0], "<# qubits in the main row>")
+    #     sys.exit(1)
+    # total_qubits = int(argv[1])
+    total_qubits = 100
     # Open the CSV file for writing
-    with open('our_heavy-hex.csv', mode='w', newline='') as file:
+    with open('csv_data/our_heavy-hex.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         # Write the header row
         writer.writerow(['num_qubits', 'Gate Count', 'swap', 'depth'])
