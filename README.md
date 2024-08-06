@@ -14,7 +14,7 @@ python3 heavy_hex_qft.py <# qubits in the main row>
 
 Fault Tolerant: Lattice sugery
 ```
-python3 lattice_sugery_qft_mix.py <an even value of #units > <bool: 1, output circuit; 0 do not output circuit>
+python3 lattice_sugery_qft_mix.py <an even value of #units > 
 ```
 
 ## Part 2: Reproduce the figure in our paper:
